@@ -49,7 +49,9 @@ for w, c in zip(width, cmap):
         c=c,
     )
 
-inset.fill_between([0, particle.vc], [0, particle.vc], [particle.vc, particle.vc], color="k", alpha=0.2)
+inset.fill_between(
+    [0, particle.vc], [0, particle.vc], [particle.vc, particle.vc], color="k", alpha=0.2
+)
 inset.plot([0, particle.vc], [0, particle.vc], c="k", zorder=0)
 
 ax.set_xlim([0, 30])

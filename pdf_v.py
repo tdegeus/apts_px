@@ -19,13 +19,10 @@ ax.set_ylabel(r"$\Phi(v_0)$")
 ax.set_xscale("log")
 ax.set_yscale("log")
 
-inset = ax.inset_axes([0.12, 0.12, 0.7, 0.7])
+inset = ax.inset_axes([0.16, 0.16, 0.6, 0.6])
 
-inset.set_xlabel(r"$v_0 - v_\mathrm{exit}$")
-inset.set_ylabel(r"$\Phi(v_0 - v_\mathrm{exit})$")
-
-inset.set_xscale("log")
-inset.set_yscale("log")
+inset.set_xlabel(r"$w$")
+inset.set_ylabel(r"$v_c$")
 
 ret = []
 
@@ -62,34 +59,16 @@ ax.yaxis.set_label_coords(-0.05, 0.5)
 
 # ---
 
-w = prrng.pcg32().normal([1000], 1, 0.3)
-v = np.logspace(-6, 0, 1000)[::-1]
-d = np.NaN * np.ones((w.size, v.size))
+w = np.linspace(0, 10, 1000)
+vc = np.array([apts.Quadratic(w=i).vc for i in w])
 
-for i in range(w.size):
+inset.plot(w, vc)
 
-    particle = apts.Quadratic(w=w[i])
+inset.set_xlim([0, 10])
+inset.set_ylim([0, 3])
 
-    for j in range(v.size):
-
-        particle.v0 = v[j]
-
-        if not particle.exits:
-            break
-
-        d[i, j] = v[j] - particle.v(particle.tau_exit)
-
-d = d.ravel()
-d = d[~np.isnan(d)]
-P, x = gplt.ccdf(d)
-
-inset.plot(x, P, rasterized=True, marker=".")
-
-inset.set_xlim([5e-3, 6e-1])
-inset.set_ylim([1e-5, 2e0])
-
-gplt.log_xticks(keep=[0, -1], axis=inset)
-gplt.log_yticks(keep=[0, -1], axis=inset)
+gplt.xticks(keep=[0, -1], axis=inset)
+gplt.yticks(keep=[0, -1], axis=inset)
 
 inset.xaxis.set_label_coords(0.5, -0.05)
 inset.yaxis.set_label_coords(-0.05, 0.5)
