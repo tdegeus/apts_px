@@ -1,0 +1,18 @@
+- python run.py -k 1 -D power distro=power_k=1.h5
+- python run.py -k 2 -D power distro=power_k=2.h5
+- python run.py -k 3 -D power distro=power_k=3.h5
+- python run.py -k 4 -D power distro=power_k=4.h5
+- python run.py -k 1 -D weibull distro=weibull_k=1.h5
+- python run.py -k 2 -D weibull distro=weibull_k=2.h5
+- python run.py -k 3 -D weibull distro=weibull_k=3.h5
+- python run.py -k 4 -D weibull distro=weibull_k=4.h5
+- python run.py -D random distro=random.h5
+- python run.py --fext 0.1 -k 1 -D power distro=power_k=1_fext=0,1.h5
+- python run.py --fext 0.1 -k 2 -D power distro=power_k=2_fext=0,1.h5
+- python run.py --fext 0.1 -k 3 -D power distro=power_k=3_fext=0,1.h5
+- python run.py --fext 0.1 -k 4 -D power distro=power_k=4_fext=0,1.h5
+- python run.py --fext 0.1 -k 1 -D weibull distro=weibull_k=1_fext=0,1.h5
+- python run.py --fext 0.1 -k 2 -D weibull distro=weibull_k=2_fext=0,1.h5
+- python run.py --fext 0.1 -k 3 -D weibull distro=weibull_k=3_fext=0,1.h5
+- python run.py --fext 0.1 -k 4 -D weibull distro=weibull_k=4_fext=0,1.h5
+- python run.py --fext 0.1 -D random distro=random_fext=0,1.h5

@@ -28,7 +28,6 @@ ret_tau = []
 ret_r = []
 ret_v = []
 
-
 while True:
 
     if not particle.exits:
