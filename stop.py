@@ -7,7 +7,7 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
-plt.style.use(["goose", "goose-latex", "goose-autolayout"])
+plt.style.use(["goose", "goose-latex", "goose-huge"])
 
 root = pathlib.Path(__file__).parent
 basename = pathlib.Path(__file__).stem
@@ -66,7 +66,9 @@ ensemble = {
 
 fig, ax = plt.subplots()
 
-inset = ax.inset_axes([0.08, 0.56, 0.44, 0.4], facecolor="w")
+inset = ax.inset_axes([0.01, 0.59, 0.44, 0.4], facecolor="w")
+# inset.tick_params(top=True, labeltop=True, bottom=False, labelbottom=False)
+inset.tick_params(right=True, labelright=True, left=False, labelleft=False)
 
 ax.set_xscale("log")
 ax.set_yscale("log")
@@ -74,18 +76,18 @@ ax.set_yscale("log")
 inset.set_xscale("log")
 inset.set_yscale("log")
 
-ax.set_xlabel(r"$w_\mathrm{stop}$")
-ax.set_ylabel(r"$P(w_\mathrm{stop}) / c_w$")
+ax.set_xlabel(r"$x$")
+ax.set_ylabel(r"$P(x) / c_x$")
 
-inset.set_xlabel(r"$v$")
-inset.set_ylabel(r"$P(v) / c_v$")
+inset.set_xlabel(r"$v_0$")
+inset.set_ylabel(r"$P(v_0) / c_v$")
 
 for name, (exponent, color, marker) in ensemble.items():
 
     with h5py.File(root / "data" / name) as file:
         hist = enstat.histogram(
-            bin_edges=file["/vstop/bin_edges"][...],
-            count=file["/vstop/count"][...],
+            bin_edges=file["/vstop/broad/bin_edges"][...],
+            count=file["/vstop/broad/count"][...],
         ).strip()
 
     p = hist.p
@@ -110,7 +112,7 @@ gplt.log_xticks(keep=[0, -1], axis=inset)
 gplt.log_yticks(keep=[0, -1], axis=inset)
 
 inset.xaxis.set_label_coords(0.5, -0.05)
-inset.yaxis.set_label_coords(-0.05, 0.5)
+inset.yaxis.set_label_coords(1.15, 0.5)
 
 # -------
 
@@ -119,11 +121,11 @@ for name, (exponent, color, marker) in ensemble.items():
     with h5py.File(root / "data" / name) as file:
         hist = (
             enstat.histogram(
-                bin_edges=file["/wstop/bin_edges"][...],
-                count=file["/wstop/count"][...],
+                bin_edges=file["/wstop/narrow/bin_edges"][...],
+                count=file["/wstop/narrow/count"][...],
             )
             .strip()
-            .squash(4)
+            .squash(200)
         )
 
     p = hist.p
@@ -136,7 +138,7 @@ for name, (exponent, color, marker) in ensemble.items():
 
     ax.plot(x, p / prefactor, c=color, marker=marker, ls="none", rasterized=True)
 
-ax.set_xlim([2e-2, 1e0])
+ax.set_xlim([1e-2, 1e0])
 ax.set_ylim([1e-5, 2e0])
 
 for k, c in zip([0, 1, 2], cm.Blues(6)[3:]):
@@ -152,9 +154,9 @@ ax.yaxis.set_label_coords(-0.05, 0.5)
 
 plot_triagle(0.47, 0.4, 0.2, 0.225, inset, "$1$")
 
-plot_triagle(0.25, 0.44, 0.1, 0.13 / 2, ax, "$2$")
-plot_inverse_triagle(0.1, 0.14, 0.1, 0.13 / 4 * 3, ax, "$3$")
-plot_triagle(0.53, 0.3, 0.1, 0.13, ax, "$4$")
+plot_triagle(0.275, 0.37, 0.1, 0.15 / 2, ax, "$2$")
+plot_inverse_triagle(0.175, 0.07, 0.1, 0.15 / 4 * 3, ax, "$3$")
+plot_triagle(0.53, 0.07 + 0.15 / 4 * 3, 0.1, 0.15, ax, "$4$")
 
 x0 = 0.85
 y0 = 0.05

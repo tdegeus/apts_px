@@ -18,16 +18,35 @@ args = parser.parse_args()
 ngroup = int(5000)
 nbatch = int(1e5)
 
+extra = ["prrng=" + prrng.version(), "enstat=" + enstat.version]
+deps = sorted(list(set(list(apts.version_dependencies()) + extra)))
+
 with h5py.File(args.file, "a" if args.append else "w") as file:
 
     if not args.append:
 
         file["/batch"] = int(0)
 
-        file[f"/wstop/bin_edges"] = np.linspace(1e-6, 5e1, int(1e5) + 1)
-        file[f"/vstop/bin_edges"] = np.linspace(1e-6, 5e1, int(1e5) + 1)
-        file[f"/wstop/count"] = np.zeros(int(1e5), dtype=np.uint64)
-        file[f"/vstop/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/wstop/log/bin_edges"] = np.logspace(-3, 1, int(1e5) + 1)
+        file["/vstop/log/bin_edges"] = np.logspace(-4, 1, int(1e5) + 1)
+        file["/Estop/log/bin_edges"] = np.logspace(-6, 1, int(1e5) + 1)
+        file["/wstop/log/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/vstop/log/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/Estop/log/count"] = np.zeros(int(1e5), dtype=np.uint64)
+
+        file["/wstop/broad/bin_edges"] = np.linspace(1e-6, 5e1, int(1e5) + 1)
+        file["/vstop/broad/bin_edges"] = np.linspace(1e-6, 5e1, int(1e5) + 1)
+        file["/Estop/broad/bin_edges"] = np.linspace(1e-6, 5e1, int(1e5) + 1)
+        file["/wstop/broad/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/vstop/broad/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/Estop/broad/count"] = np.zeros(int(1e5), dtype=np.uint64)
+
+        file["/wstop/narrow/bin_edges"] = np.linspace(1e-2, 1e0, int(1e5) + 1)
+        file["/vstop/narrow/bin_edges"] = np.linspace(1e-3, 3e-1, int(1e5) + 1)
+        file["/Estop/narrow/bin_edges"] = np.linspace(1e-5, 1e-1, int(1e5) + 1)
+        file["/wstop/narrow/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/vstop/narrow/count"] = np.zeros(int(1e5), dtype=np.uint64)
+        file["/Estop/narrow/count"] = np.zeros(int(1e5), dtype=np.uint64)
 
         file["/param/distribution_v0/seed"] = int(1)
         file["/param/distribution_v0/name"] = "normal"
@@ -54,19 +73,54 @@ with h5py.File(args.file, "a" if args.append else "w") as file:
         file["/param/eta"] = float(0.1)
         file["/param/mu"] = float(1)
 
-        file["/meta/version_dependencies"] = apts.version_dependencies()
+        file["/meta/version_dependencies"] = deps
         file["/meta/version_compiler"] = apts.version_compiler()
 
         file.flush()
 
-    hist_w = enstat.histogram(
-        bin_edges=file["/wstop/bin_edges"][...],
-        count=file["/wstop/count"][...],
+    hist_w_log = enstat.histogram(
+        bin_edges=file["/wstop/log/bin_edges"][...],
+        count=file["/wstop/log/count"][...],
     )
 
-    hist_v = enstat.histogram(
-        bin_edges=file["/vstop/bin_edges"][...],
-        count=file["/vstop/count"][...],
+    hist_v_log = enstat.histogram(
+        bin_edges=file["/vstop/log/bin_edges"][...],
+        count=file["/vstop/log/count"][...],
+    )
+
+    hist_E_log = enstat.histogram(
+        bin_edges=file["/Estop/log/bin_edges"][...],
+        count=file["/Estop/log/count"][...],
+    )
+
+    hist_w_broad = enstat.histogram(
+        bin_edges=file["/wstop/broad/bin_edges"][...],
+        count=file["/wstop/broad/count"][...],
+    )
+
+    hist_v_broad = enstat.histogram(
+        bin_edges=file["/vstop/broad/bin_edges"][...],
+        count=file["/vstop/broad/count"][...],
+    )
+
+    hist_E_broad = enstat.histogram(
+        bin_edges=file["/Estop/broad/bin_edges"][...],
+        count=file["/Estop/broad/count"][...],
+    )
+
+    hist_w_narrow = enstat.histogram(
+        bin_edges=file["/wstop/narrow/bin_edges"][...],
+        count=file["/wstop/narrow/count"][...],
+    )
+
+    hist_v_narrow = enstat.histogram(
+        bin_edges=file["/vstop/narrow/bin_edges"][...],
+        count=file["/vstop/narrow/count"][...],
+    )
+
+    hist_E_narrow = enstat.histogram(
+        bin_edges=file["/Estop/narrow/bin_edges"][...],
+        count=file["/Estop/narrow/count"][...],
     )
 
     seed_w = file["/param/distribution_w/seed"][...]
@@ -124,11 +178,29 @@ with h5py.File(args.file, "a" if args.append else "w") as file:
                 seed=batch * ngroup + seed_w,
             )
 
-        hist_w += wstop
-        file["/wstop/count"][...] = hist_w.count
+        hist_w_log += wstop
+        hist_v_log += vstop
+        hist_E_log += 0.5 * m * vstop**2
 
-        hist_v += vstop
-        file["/vstop/count"][...] = hist_v.count
+        hist_w_broad += wstop
+        hist_v_broad += vstop
+        hist_E_broad += 0.5 * m * vstop**2
+
+        hist_w_narrow += wstop
+        hist_v_narrow += vstop
+        hist_E_narrow += 0.5 * m * vstop**2
+
+        file["/wstop/log/count"][...] = hist_w_log.count
+        file["/vstop/log/count"][...] = hist_v_log.count
+        file["/Estop/log/count"][...] = hist_E_log.count
+
+        file["/wstop/broad/count"][...] = hist_w_broad.count
+        file["/vstop/broad/count"][...] = hist_v_broad.count
+        file["/Estop/broad/count"][...] = hist_E_broad.count
+
+        file["/wstop/narrow/count"][...] = hist_w_narrow.count
+        file["/vstop/narrow/count"][...] = hist_v_narrow.count
+        file["/Estop/narrow/count"][...] = hist_E_narrow.count
 
         file["/batch"][...] = batch + 1
 
